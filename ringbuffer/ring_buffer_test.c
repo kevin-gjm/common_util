@@ -45,10 +45,9 @@ void * consumer_proc(void *arg)
 {
     struct ring_buffer *ring_buf = (struct ring_buffer *)arg;
     student_info stu_info;
-    printf("consumer_proc\n");
     while(1)
     {
-    sleep(1);
+    sleep(2);
     printf("------------------------------------------\n");
     printf("get a student info from ring buffer.\n");
     ring_buffer_get(ring_buf, (void *)&stu_info, sizeof(student_info));
@@ -63,7 +62,6 @@ void * producer_proc(void *arg)
 {
     time_t cur_time;
     struct ring_buffer *ring_buf = (struct ring_buffer *)arg;
-    printf("producer_proc\n");
     while(1)
     {
     time(&cur_time);
