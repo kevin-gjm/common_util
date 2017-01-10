@@ -5,6 +5,7 @@
 #include "ring_buffer.h"
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE  1024 * 1024
 
@@ -44,9 +45,10 @@ void * consumer_proc(void *arg)
 {
     struct ring_buffer *ring_buf = (struct ring_buffer *)arg;
     student_info stu_info;
+    printf("consumer_proc\n");
     while(1)
     {
-    sleep(2);
+    sleep(1);
     printf("------------------------------------------\n");
     printf("get a student info from ring buffer.\n");
     ring_buffer_get(ring_buf, (void *)&stu_info, sizeof(student_info));
@@ -61,6 +63,7 @@ void * producer_proc(void *arg)
 {
     time_t cur_time;
     struct ring_buffer *ring_buf = (struct ring_buffer *)arg;
+    printf("producer_proc\n");
     while(1)
     {
     time(&cur_time);
@@ -77,33 +80,6 @@ void * producer_proc(void *arg)
     return (void *)ring_buf;
 }
 
-int consumer_thread(void *arg)
-{
-    int err;
-    pthread_t tid;
-    err = pthread_create(&tid, NULL, consumer_proc, arg);
-    if (err != 0)
-    {
-    fprintf(stderr, "Failed to create consumer thread.errno:%u, reason:%s\n",
-        errno, strerror(errno));
-    return -1;
-    }
-    return tid;
-}
-int producer_thread(void *arg)
-{
-    int err;
-    pthread_t tid;
-    err = pthread_create(&tid, NULL, producer_proc, arg);
-    if (err != 0)
-    {
-    fprintf(stderr, "Failed to create consumer thread.errno:%u, reason:%s\n",
-        errno, strerror(errno));
-    return -1;
-    }
-    return tid;
-}
-
 
 int main()
 {
@@ -112,7 +88,10 @@ int main()
     struct ring_buffer *ring_buf = NULL;
     pthread_t consume_pid, produce_pid;
 
-    pthread_mutex_t *f_lock = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_t lock =  PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_t *f_lock  = &lock;
+
+   // pthread_mutex_t *f_lock = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
     if (pthread_mutex_init(f_lock, NULL) != 0)
     {
     fprintf(stderr, "Failed init mutex,errno:%u,reason:%s\n",
@@ -141,8 +120,18 @@ int main()
     print_student_info(stu_info);
 #endif
     printf("multi thread test.......\n");
-    produce_pid  = producer_thread((void*)ring_buf);
-    consume_pid  = consumer_thread((void*)ring_buf);
+    if(pthread_create(&produce_pid,NULL,producer_proc,(void*)ring_buf) != 0)
+    {
+        fprintf(stderr, "Failed to create producer thread.errno:%u, reason:%s\n",
+        errno, strerror(errno));
+    return -1;
+    }
+    if(pthread_create(&consume_pid,NULL,consumer_proc,(void*)ring_buf) != 0)
+    {
+    fprintf(stderr, "Failed to create consumer thread.errno:%u, reason:%s\n",
+        errno, strerror(errno));
+    return -1;
+    }
     pthread_join(produce_pid, NULL);
     pthread_join(consume_pid, NULL);
     ring_buffer_free(ring_buf);
