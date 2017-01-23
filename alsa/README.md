@@ -7,3 +7,6 @@ from http://users.suse.com/~mana/alsa090_howto.html
 from http://blog.csdn.net/g1036583997/article/details/54646356
 ##play_wav.c 
 forget it 
+##capture_playback.c
+capture and play at the same time use ringbuffer 
+
