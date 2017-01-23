@@ -1,0 +1,5 @@
+all:audio_test_playback.cc audio_test_capture.cc 
+	g++ audio_test_playback.cc -lasound -o test_playback -g -Wall
+	g++ audio_test_capture.cc -lasound -o test_capture -g -Wall
+clean:
+	rm -rf *.o test

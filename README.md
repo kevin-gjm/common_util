@@ -3,3 +3,5 @@
 
 ## ringfifo
 环形缓冲区
+## alsa
+alsa linux 音频相关部分，单独的采集。发声。播放wav。边采边播
